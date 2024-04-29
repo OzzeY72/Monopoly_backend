@@ -47,11 +47,16 @@ export class Game {
         this.event.on('playerAgreeBargaining',(player_id:number)=>this.onPlayerAgreeBargaining(player_id));
         this.event.on('playerDeclineBargaining',(player_id:number)=>this.onPlayerDeclineBargaining(player_id));
         this.event.on('bargainingFinish',(player_id:number)=>this.onBargainingFinish(player_id));
+        this.event.on('duplicate',(player_id)=>this.onDuplicate(player_id));
 
         //Debug
         this.event.on('changedCoupling',(coupling:number)=>{
             console.debug(coupling ? "Become coupled" : "Become uncoupled");
         });
+    }
+
+    onDuplicate(player_id:number){
+        console.log("Player " + this.getPlayer(player_id).nickname + " get duplicate");
     }
 
     createTemplateAction(branch:IBranch):IAction
@@ -151,7 +156,7 @@ export class Game {
             this.players.forEach(
                 (player)=>this.bargaining.push(player)
             )
-            this.bargaining.forEach((player)=>console.log(player));
+            //this.bargaining.forEach((player)=>console.log(player));
             console.log(this.bargaining_turn);
             this.actionInOrder = this.createTemplateAction(this.bargaining_branch);
             this.actionInOrder.player = this.getPlayerBargaining(this.bargaining_turn);
@@ -162,6 +167,8 @@ export class Game {
     onPlayerKill(player_id:number)
     {
         const player = this.getPlayer(player_id);
+        this.players.splice(this.players.indexOf(player),1);
+        this.checkWin();
         console.log(player.nickname + " dead!");
     }
 
@@ -178,7 +185,7 @@ export class Game {
         const branch = this.getBranch(branch_id);
 
         console.log(`Player ${player.nickname} bought ${branch.name} with id ${branch.id}`);
-        console.log(player);
+        //console.log(player);
     }
 
     onPlayerPayedFee(player_id:number,branch_id:number)
@@ -187,8 +194,8 @@ export class Game {
         const branch = this.getBranch(branch_id);
 
         console.log(`Player ${player.nickname} payed ${branch.owner.nickname} rent ${branch.rankfee[branch.star_count].fee}`);
-        console.log(player);
-        console.log(branch.owner);
+        //console.log(player);
+        //console.log(branch.owner);
     }
 
     onPlayerReachStart(player_id:number)
@@ -230,16 +237,16 @@ export class Game {
         this.gameState = new_state;
     }
 
-    throwCube():number{
+    throwCube():[number,number,number]{
         if(this.gameState == GameState.inGame)
         {
             let a = Math.floor(Math.random()*7)+1;
             let b = Math.floor(Math.random()*7)+1;
 
             Event.getInstance().invoke('cubeThrowed',[a,b]);
-            return a+b;
+            return [a,b,a+b];
         }
-        return 0;
+        return [0,0,0];
     }
 
     bargainingTurn(){
@@ -252,6 +259,7 @@ export class Game {
 
     turn(){
         this.playerTurn = (this.playerTurn+1) % this.players.length; 
+        console.log("Next turn " + this.getPlayer(this.playerTurn).nickname);
     }
 
     movePlayer(player_id:number,step: number | null):IAction | null{
@@ -259,10 +267,11 @@ export class Game {
             this.gameState == GameState.inGame
         ){
             const player = this.getPlayer(player_id); 
+            const cube = this.throwCube();
 
             let cubePoints;
             if(step == null )
-                cubePoints = this.throwCube();
+                cubePoints = cube[2];
             else
                 cubePoints = step;
 
@@ -277,10 +286,27 @@ export class Game {
                     this.actionInOrder = this.branches[player.location]?.getAction(player);
                     this.actionInOrder.player = player;
                 }
-                this.turn();
+
+                if(cube[0] != cube[1]){
+                    this.turn();
+                }
+                else{
+                    this.event.invoke("duplicate",(player.id));
+                }
+    
                 return this.actionInOrder;
             }
         }
         return null;
+    }
+    checkWin(){
+        if(this.players.length == 1){
+            this.changeGameState(GameState.End);
+            console.log(this.players[0].nickname + " Wins !");
+            this.event.invoke('win',this.players[0].id);
+        }
+    }
+    getPlayerTurn(){
+        return this.playerTurn;
     }
 }

@@ -31,15 +31,18 @@ export class Branch implements IBranch{
                     let payed_money;
                     if(player.money >= this.getCurrentFee().fee){
                         payed_money = this.getCurrentFee().fee;
+                        Event.getInstance().invoke('playerPayedFee',[player.id,this.id]);
                     }
                     else{
                         payed_money = player.money;
-                        //Player looses
-                        player.killPlayer();
+                        console.log(player);
+                        if((player.getFullCapital() * 0.9) <= this.getCurrentFee().fee){
+                            player.killPlayer();
+                        }
                     }
                     player.money -= payed_money;
                     this.owner.money += payed_money;
-                    Event.getInstance().invoke('playerPayedFee',[player.id,this.id]);
+                    
                 }],
             ]
         },
@@ -82,7 +85,7 @@ export class Branch implements IBranch{
     ){}
 
     getAction(player: IPlayer):IAction {
-        console.log(this.id +" "+ this.name);
+        //console.log(this.id +" "+ this.name);
         if(!this.inPledge){
             if(this.owner == null)
                 return this.actions[1];

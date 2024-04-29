@@ -13,4 +13,6 @@ export interface IPlayer {
     isAbleToMove:()=>boolean;
     passOneTurn:()=>void;
     killPlayer:()=>void;
+    getCapital:()=>number;
+    getFullCapital:()=>number;
 }

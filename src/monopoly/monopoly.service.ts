@@ -51,25 +51,36 @@ export class MonopolyService {
     return actionToDTO(this.game.onPlayerAnswer(id,answer)!);
   }
   playerMove(id:number,step: number | null):dtoAction{
-    console.log(this.game.getPlayer(0));
     return actionToDTO(this.game.movePlayer(id,step)!);
   }
   debug(){
     this.playerMove(0,0);
     this.playerAnswer(0,true);
-    this.playerMove(1,2);
+    //this.playerMove(1,2);
+    //this.playerAnswer(1,true);
+    //this.playerMove(0,1);
+    //this.playerAnswer(0,true);
+    this.playerMove(1,0);
+    this.game.getPlayer(1).money = 0;
+    console.log(this.game.getPlayer(1).getFullCapital())
     this.playerAnswer(1,true);
-    this.playerMove(0,1);
-    this.playerAnswer(0,true);
+    //this.branchAction(0,'upgrade');
+    //console.log(this.game.getPlayer(0).getCapital());
   }
   branchAction(branch_id:number,action:string):boolean{
     const branch = this.game.getBranch(branch_id);
-    switch(action){
-      case 'upgrade': return branch.upgrade();
-      case 'degrade': return branch.degrade();
-      case 'pledge': return branch.pledge();
-      case 'ransom': return branch.ransom(); 
-      default: break;
+
+    if(this.game.getPlayerTurn() == branch.owner.id){
+      switch(action){
+        case 'upgrade': return branch.upgrade();
+        case 'degrade': return branch.degrade();
+        case 'pledge': return branch.pledge();
+        case 'ransom': return branch.ransom(); 
+        default: break;
+      }
+    }
+    else{
+      console.warn('Not your turn');
     }
   }
 }
