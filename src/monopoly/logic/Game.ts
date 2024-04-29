@@ -48,7 +48,10 @@ export class Game {
         this.event.on('playerDeclineBargaining',(player_id:number)=>this.onPlayerDeclineBargaining(player_id));
         this.event.on('bargainingFinish',(player_id:number)=>this.onBargainingFinish(player_id));
 
-        this.event.on('playerBought',(data:[number,number])=>this.checkCoupledBranch(data[0],data[1]));
+        //Debug
+        this.event.on('changedCoupling',(coupling:number)=>{
+            console.debug(coupling ? "Become coupled" : "Become uncoupled");
+        });
     }
 
     createTemplateAction(branch:IBranch):IAction
@@ -97,25 +100,6 @@ export class Game {
             return null;
     }
 
-    checkCoupledBranch(player_id:number,branch_id:number)
-    {
-        const player = this.getPlayer(player_id);
-        const branch = this.getBranch(branch_id);
-        
-        let arr = [];
-
-        player.branches.forEach(tmp => {
-            if(branch.type == tmp.type){
-                arr.push(tmp);
-            }
-        });
-        if(arr.length == 3){
-            arr.forEach(tmp=>{
-                tmp.coupled = true;
-            });
-        }
-    }
-
     onBargainingFinish(data:number)
     {
         console.log("bargaining finish")
@@ -124,7 +108,7 @@ export class Game {
             if(player.money >= this.bargaining_branch.getCurrentFee().cost + this.bargaining_count*100){
                 player.money -= this.bargaining_branch.getCurrentFee().cost + this.bargaining_count*100;
                 this.bargaining_branch.owner = player;
-                player.branches.push(this.bargaining_branch);
+                player.branch_manager.add(this.bargaining_branch);
                 Event.getInstance().invoke('playerBought',[player.id,this.bargaining_branch.id]);
             }
         }

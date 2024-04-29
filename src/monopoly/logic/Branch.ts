@@ -15,6 +15,9 @@ export class RankFee implements IRankFee
 export class Branch implements IBranch{
     public star_count: number = 0;
     public owner: IPlayer = null;
+    public coupled: number = 0;
+    public inPledge: boolean = false;
+    public inPledgeDaysLeft: number = 0;
     public actions: IAction[] = [
         {
             name: "ACTION_PAYFEE_NAME",
@@ -26,8 +29,8 @@ export class Branch implements IBranch{
                 //POSSIBLY BAGGY
                 (player)=>{
                     let payed_money;
-                    if(player.money >= this.rankfee[this.star_count].fee){
-                        payed_money = this.rankfee[this.star_count].fee;
+                    if(player.money >= this.getCurrentFee().fee){
+                        payed_money = this.getCurrentFee().fee;
                     }
                     else{
                         payed_money = player.money;
@@ -50,8 +53,8 @@ export class Branch implements IBranch{
                         if(player.money >= this.getCurrentFee().cost){
                             player.money -= this.getCurrentFee().cost;
                             this.owner = player;
-                            player.branches.push(this);
-                            Event.getInstance().invoke('playerBought',[player.id,this.id]);
+                            player.branch_manager.add(this);
+                            //Event.getInstance().invoke('playerBought',[player.id,this.id]);
                         }
                         else{
                             Event.getInstance().invoke('beginBargaining',this.id);
@@ -70,23 +73,28 @@ export class Branch implements IBranch{
     constructor(
         public id: number,
         public name: string,
-        public type: string,
         public icon: string,
         public description:string,
+        public type: string,
+        public coupling_max: number,
         public rankfee: IRankFee[],
-        public coupled_branches: IBranch[],
-        public coupled: boolean
+
     ){}
 
     getAction(player: IPlayer):IAction {
         console.log(this.id +" "+ this.name);
-        if(this.owner == null)
-            return this.actions[1];
+        if(!this.inPledge){
+            if(this.owner == null)
+                return this.actions[1];
+            else{
+                if(this.owner == player)
+                    return null;
+                else
+                    return this.actions[0];
+            }
+        }
         else{
-            if(this.owner == player)
-                return null;
-            else
-                return this.actions[0];
+            return null;
         }
     }
     getCurrentFee():IRankFee{
@@ -98,4 +106,51 @@ export class Branch implements IBranch{
         }
         return this.rankfee[this.star_count];
     }
+    upgrade():boolean{
+        if(this.star_count < 5 &&
+            !this.inPledge
+        ){
+            if(this.owner.money >= this.rankfee[this.star_count+1].cost){
+                this.owner.money -= this.rankfee[this.star_count+1].cost;
+                this.star_count++;
+                console.log([this]);
+                return true;
+            }
+        }
+        return false;
+    }
+    degrade():boolean{
+        if(this.star_count > 0){
+            this.owner.money += this.rankfee[this.star_count].pledge;
+            this.star_count--;
+            console.log([this]);
+            return true;
+        }
+        return false;
+    }
+    pledge():boolean{
+        if(this.star_count == 0 && 
+            !this.inPledge
+        ){
+            this.owner.money += this.rankfee[0].pledge;
+            this.inPledge = true;
+            this.inPledgeDaysLeft = 15;
+            console.log([this]);
+            return true;
+        }
+        return false;
+    }
+    ransom():boolean{
+        if(this.owner.money >= this.rankfee[0].pledge &&
+            this.inPledge
+        ){
+            this.owner.money -= this.rankfee[0].pledge;
+            this.inPledge = false;
+            this.inPledgeDaysLeft = 0;
+            console.log([this]);
+            return true;
+        }
+        return false;
+    }
+
 }

@@ -18,7 +18,16 @@ export interface IBranch {
     type: string;
     rankfee: IRankFee[];
     actions: IAction[];
+    coupled: number;
+    coupling_max: number;
+    inPledge: boolean;
+    inPledgeDaysLeft: number;
 
     getAction:(player:IPlayer)=>IAction;
     getCurrentFee:()=>IRankFee;
+
+    upgrade:()=>boolean;
+    degrade:()=>boolean;
+    pledge:()=>boolean;
+    ransom:()=>boolean;
 }

@@ -1,11 +1,12 @@
 import { IBranch } from "./IBranch";
+import { BranchManager } from "./BranchManager";
 
 export interface IPlayer {
     id: number,
     nickname: string,
     money: number,
     location: number,
-    branches: IBranch[],
+    branch_manager: BranchManager,
     canMove: boolean,
     alive: boolean,
 

@@ -13,10 +13,20 @@ export function databaseToLogic(data:Branchdb) : IBranch{
         star_count: 0,
         owner: null,
         rankfee: data.rankfee,
+        type: '',
+        coupled: 0,
+        coupling_max: 0,
+        inPledge: false,
+        inPledgeDaysLeft:0,
 
         actions:null,
         getAction:null,
-        getCurrentFee:null
+        getCurrentFee:null,
+        upgrade:null,
+        degrade:null,
+        pledge:null,
+        ransom:null,
+
     });
 }
 

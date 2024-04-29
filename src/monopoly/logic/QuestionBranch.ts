@@ -7,6 +7,11 @@ import { Event } from "./Event";
 export class QuestionBranch implements IBranch{
     public star_count: number = 0;
     public owner: IPlayer = null;
+    public coupled: number = 0;
+    public coupling_max: number = 0; 
+    public inPledge: boolean = false;
+    public inPledgeDaysLeft: number = 0;
+
     public actions: IAction[] = [
         {
             name: "ACTION_WIN_MONEY",
@@ -74,4 +79,9 @@ export class QuestionBranch implements IBranch{
     getCurrentFee():IRankFee{
         return null;
     }
+
+    upgrade(){return false;}
+    degrade(){return false;}
+    pledge(){return false;}
+    ransom(){return false;}
 }

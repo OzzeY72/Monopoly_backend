@@ -18,4 +18,15 @@ export class MonopolyController {
     return JSON.stringify(this.monopolyService.playerAnswer(body.player_id,body.answer));
   }
 
+  @Get('debug')
+  debug(){
+    this.monopolyService.debug();
+    this.monopolyService.game.getPlayer(0).branch_manager.getBranches();
+  }
+
+  @Post('action')
+  branchAction(@Body() body: any):boolean{
+    return this.monopolyService.branchAction(body.branch_id,body.action);
+  }
+
 }
