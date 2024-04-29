@@ -56,6 +56,7 @@ export class QuestionBranch implements IBranch{
         public icon: string,
         public description:string,
         public rankfee: IRankFee[],
+        public type: string,
     ){}
 
     getAction(player: IPlayer):IAction {

@@ -15,6 +15,7 @@ export interface IBranch {
     description:string;
     star_count: number;
     owner: Player;
+    type: string;
     rankfee: IRankFee[];
     actions: IAction[];
 

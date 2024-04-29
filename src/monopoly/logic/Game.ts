@@ -11,6 +11,13 @@ export enum GameState {
     bargaining,
     End,
 }
+/* 
+    Event List
+    playerBought - player earns branch
+    playerReachStart
+    cubeThrowed
+    
+*/
 
 export class Game {
     private playerTurn:number = 0;
@@ -40,6 +47,8 @@ export class Game {
         this.event.on('playerAgreeBargaining',(player_id:number)=>this.onPlayerAgreeBargaining(player_id));
         this.event.on('playerDeclineBargaining',(player_id:number)=>this.onPlayerDeclineBargaining(player_id));
         this.event.on('bargainingFinish',(player_id:number)=>this.onBargainingFinish(player_id));
+
+        this.event.on('playerBought',(data:[number,number])=>this.checkCoupledBranch(data[0],data[1]));
     }
 
     createTemplateAction(branch:IBranch):IAction
@@ -86,6 +95,25 @@ export class Game {
             return this.branches[id];
         else
             return null;
+    }
+
+    checkCoupledBranch(player_id:number,branch_id:number)
+    {
+        const player = this.getPlayer(player_id);
+        const branch = this.getBranch(branch_id);
+        
+        let arr = [];
+
+        player.branches.forEach(tmp => {
+            if(branch.type == tmp.type){
+                arr.push(tmp);
+            }
+        });
+        if(arr.length == 3){
+            arr.forEach(tmp=>{
+                tmp.coupled = true;
+            });
+        }
     }
 
     onBargainingFinish(data:number)

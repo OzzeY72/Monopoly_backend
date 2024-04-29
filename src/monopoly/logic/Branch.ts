@@ -70,9 +70,12 @@ export class Branch implements IBranch{
     constructor(
         public id: number,
         public name: string,
+        public type: string,
         public icon: string,
         public description:string,
         public rankfee: IRankFee[],
+        public coupled_branches: IBranch[],
+        public coupled: boolean
     ){}
 
     getAction(player: IPlayer):IAction {
@@ -87,6 +90,12 @@ export class Branch implements IBranch{
         }
     }
     getCurrentFee():IRankFee{
+        if(this.star_count == 0){
+            if(this.coupled)
+                return this.rankfee[this.rankfee.length-1];
+            else
+                return this.rankfee[0];
+        }
         return this.rankfee[this.star_count];
     }
 }
