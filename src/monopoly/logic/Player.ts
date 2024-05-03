@@ -1,10 +1,9 @@
-import { IBranch } from "./IBranch";
-import {IPlayer} from "./IPlayer"
+import { IBranch, IUpgradeAble } from "./interface/BranchInterfaces";
 import { Event } from "./Event";
 import {BranchManager} from "./BranchManager"
 import { get } from "http";
 
-export class Player implements IPlayer {
+export class Player {
     public location: number = 0;
     public canMove: boolean = true;
     public branch_manager: BranchManager;
@@ -20,8 +19,9 @@ export class Player implements IPlayer {
 
     killPlayer(){
         if(this.alive){
-            Event.getInstance().invoke('playerKilled',this.id);
             this.alive = false;
+            this.branch_manager = new BranchManager();
+            Event.getInstance().invoke('playerKilled',this.id);
         }
         else{
             console.log('already dead');
@@ -43,9 +43,14 @@ export class Player implements IPlayer {
         let capital = 0;
         const branches = this.branch_manager.getBranches();
         
-        branches.forEach(branch=>{
-            for(let i = 0;i <= branch.star_count;i++){
-                capital += branch.rankfee[i].pledge;
+        branches.forEach((branch:any)=>{
+            if((branch as IUpgradeAble).star_count !== undefined){
+                for(let i = 0;i <= branch.star_count;i++){
+                    capital += branch.rankfee[i].pledge;
+                }
+            }
+            else{
+                capital += branch.rankfee[0].pledge;
             }
         });
         return capital;

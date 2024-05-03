@@ -1,33 +1,81 @@
 import { IAction } from "src/monopoly/logic/Action";
-import { IBranch } from "../../logic/IBranch"
+import { IBranch, IUpgradeAble } from "../../logic/interface/BranchInterfaces"
 import { Branchdb} from "../Branchdb"
 import { IDataBase } from "../IDataBase";
 import { dtoAction } from "../dto/dtoAction";
+import { DefaultBranch } from "src/monopoly/logic/Branches/DefaultBranch";
+import { Branch } from "src/monopoly/logic/Branches/Branch";
+import { dtoBranch } from "../dto/dtoBranch";
+import { OwnAbleBranch } from "src/monopoly/logic/Branches/OwnAbleBranch";
+import { Player } from "src/monopoly/logic/Player";
+import { dtoPlayer } from "../dto/dtoPlayer";
 
-export function databaseToLogic(data:Branchdb) : IBranch{
-    return ({
-        id: data.id,
-        name: data.name,
-        icon: data.icon,
-        description: data.description,
-        star_count: 0,
-        owner: null,
-        rankfee: data.rankfee,
-        type: '',
-        coupled: 0,
-        coupling_max: 0,
-        inPledge: false,
-        inPledgeDaysLeft:0,
+function AbstractBranchToDTO(branch:Branch):dtoBranch{
+    return (new dtoBranch(
+        branch.getClass(),
+        branch.id,
+        branch.name,
+        branch.icon,
+        branch.description,
+        branch.type,
+        null,
+        false,
+        0,
+        null,
+        0
+    ));
+}
+function OwnAbleBranchToDTO(branch:OwnAbleBranch):dtoBranch{
+    return (new dtoBranch(
+        branch.getClass(),
+        branch.id,
+        branch.name,
+        branch.icon,
+        branch.description,
+        branch.type,
+        branch.owner,
+        branch.inPledge,
+        branch.inPledgeDaysLeft,
+        branch.getCurrentFee(),
+        0
+    ));
+}
+function UpgradableBranchToDTO(branch:any):dtoBranch{
+    return (new dtoBranch(
+        branch.getClass(),
+        branch.id,
+        branch.name,
+        branch.icon,
+        branch.description,
+        branch.type,
+        branch.owner,
+        branch.inPledge,
+        branch.inPledgeDaysLeft,
+        branch.getCurrentFee(),
+        branch.star_count
+    ));
+}
 
-        actions:null,
-        getAction:null,
-        getCurrentFee:null,
-        upgrade:null,
-        degrade:null,
-        pledge:null,
-        ransom:null,
+export function PlayerToDTO(player: Player){
+    return new dtoPlayer(
+        player.id,
+        player.nickname,
+        player.money,
+        player.location,
+        player.canMove,
+        player.alive,
+        player.getFullCapital(),
+        player.branch_manager.getBranches().map(branch=>BranchToDTO(branch))
+    );
+}
 
-    });
+export function BranchToDTO(branch:IBranch){
+    switch(branch.getClass()){
+        case "Branch": return AbstractBranchToDTO(branch as Branch);
+        case "DefaultBranch": return UpgradableBranchToDTO(branch);
+        case "OwnAbleBranch": return OwnAbleBranchToDTO(branch as DefaultBranch);
+       
+    }
 }
 
 export function actionToDTO(action:IAction):dtoAction

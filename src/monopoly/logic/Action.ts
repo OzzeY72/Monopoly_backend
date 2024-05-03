@@ -1,17 +1,17 @@
-import { IPlayer } from "./IPlayer"
+import { Player } from "./Player"
 
 export interface IAction {
     name: string,
     description: string,
-    player: IPlayer,
-    buttons: [string,(player:IPlayer)=>void][]
+    player: Player,
+    buttons: [string,(player:Player)=>void][]
 }
 
 export class Action implements IAction{
     constructor(
         public name: string,
         public description: string,
-        public player: IPlayer,
-        public buttons : [string, (player:IPlayer)=>void][],
+        public player: Player,
+        public buttons : [string, (player:Player)=>void][],
     ){}
 }

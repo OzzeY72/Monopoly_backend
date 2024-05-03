@@ -21,7 +21,15 @@ export class MonopolyController {
   @Get('debug')
   debug(){
     this.monopolyService.debug();
-    this.monopolyService.game.getPlayer(0).branch_manager.getBranches();
+    //this.monopolyService.game.getPlayer(0).branch_manager.getBranches();
+  }
+  @Get('branches')
+  branches(){
+    return this.monopolyService.getBranchesInDto();
+  }
+  @Get('players')
+  players(){
+    return this.monopolyService.getPlayersInDto();
   }
 
   @Post('action')

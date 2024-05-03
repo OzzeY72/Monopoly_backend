@@ -1,4 +1,6 @@
-import { IBranch } from "./IBranch";
+import { IBranch, ICoupleAble } from "./interface/BranchInterfaces";
+import { OwnAbleBranch } from "./Branches/OwnAbleBranch";
+import { DefaultBranch } from "./Branches/DefaultBranch";
 import { Event } from "./Event";
 
 export class BranchManager{
@@ -11,9 +13,15 @@ export class BranchManager{
         });
         return ret_array;
     }
+    getOwnAbleBranches(){
+        return this.getBranches().filter(branch=>branch instanceof OwnAbleBranch);
+    }
+    getBranchesWithStar(){
+        return this.getBranches().filter(branch=>branch instanceof DefaultBranch);
+    }
     getStarSum(){
         let star_count = 0;
-        this.getBranches().forEach((branch)=>{
+        this.getBranchesWithStar().forEach((branch:DefaultBranch)=>{ 
             star_count += branch.star_count;
         });
         return star_count;
@@ -21,40 +29,28 @@ export class BranchManager{
     getBranchesByType(type:string){
         return this.typed_branches.get(type);
     }
-    add(branch:IBranch){
+    add(branch){
         if(!this.typed_branches.has(branch.type)){
             this.typed_branches.set(branch.type,[branch]);
         }
         else{
             this.typed_branches.get(branch.type).push(branch);
         }
-
-        this.checkCoupled(branch);
+        this.getOwnAbleBranches().forEach((branch)=>this.updateCoupled(branch));
         Event.getInstance().invoke('playerEarn',branch);
     }
     remove(branch:IBranch){
         const branches = this.getBranchesByType(branch.type);
         branches.splice(branches.indexOf(branch),1);
 
-        this.checkCoupled(branch);
+        this.getOwnAbleBranches().forEach((branch)=>this.updateCoupled(branch));
         Event.getInstance().invoke('playerLost',branch);
     }
 
-    private checkCoupled(branch:IBranch)
+    private updateCoupled(branch:any)
     {
-        const type = branch.type;
-        const branches_typed = this.getBranchesByType(type);
-        if(branches_typed.length == branch.coupling_max){
-            if(branches_typed[0].coupled != 1){
-                branches_typed.forEach(branch=>branch.coupled = 1);
-                Event.getInstance().invoke('changedCoupling',1);
-            }
-        }
-        else{
-            if(branches_typed[0].coupled != 0){
-                branches_typed.forEach(branch=>branch.coupled = 0);
-                Event.getInstance().invoke('changedCoupling',0);
-            }
-        }
+        if ((branch as ICoupleAble).couple_level !== undefined) {
+            branch.setCoupleLevel(this.typed_branches.get(branch.type).length+1);
+        } 
     }
 }

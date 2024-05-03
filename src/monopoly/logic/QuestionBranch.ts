@@ -1,12 +1,12 @@
-import { IBranch, IRankFee } from "./IBranch";
-import { IPlayer } from "./IPlayer";
-import { RankFee } from "./Branch";
+import { IBranch, RankFee } from "./interface/IBranch";
+import { Branch } from "./Branches/Branch";
+import {Player} from "./Player";
 import { Action, IAction } from "./Action";
 import { Event } from "./Event";
 
 export class QuestionBranch implements IBranch{
     public star_count: number = 0;
-    public owner: IPlayer = null;
+    public owner: Player = null;
     public coupled: number = 0;
     public coupling_max: number = 0; 
     public inPledge: boolean = false;
@@ -60,11 +60,11 @@ export class QuestionBranch implements IBranch{
         public name: string,
         public icon: string,
         public description:string,
-        public rankfee: IRankFee[],
+        public rankfee: RankFee[],
         public type: string,
     ){}
 
-    getAction(player: IPlayer):IAction {
+    getAction(player: Player):IAction {
         console.log(this.id +" "+ this.name);
         if(this.owner == null)
             return this.actions[1];
@@ -76,7 +76,7 @@ export class QuestionBranch implements IBranch{
         }
     }
 
-    getCurrentFee():IRankFee{
+    getCurrentFee():RankFee{
         return null;
     }
 
@@ -84,4 +84,5 @@ export class QuestionBranch implements IBranch{
     degrade(){return false;}
     pledge(){return false;}
     ransom(){return false;}
+    getClass(){return "s"}
 }
