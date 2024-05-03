@@ -9,6 +9,8 @@ import { dtoBranch } from "../dto/dtoBranch";
 import { OwnAbleBranch } from "src/monopoly/logic/Branches/OwnAbleBranch";
 import { Player } from "src/monopoly/logic/Player";
 import { dtoPlayer } from "../dto/dtoPlayer";
+import { Game } from "src/monopoly/logic/Game";
+import { dtoGame } from "../dto/dtoGame";
 
 function AbstractBranchToDTO(branch:Branch):dtoBranch{
     return (new dtoBranch(
@@ -55,7 +57,16 @@ function UpgradableBranchToDTO(branch:any):dtoBranch{
         branch.star_count
     ));
 }
-
+export function GameToDTO(game: Game){
+    return new dtoGame(
+        game.getTurn(),
+        game.getCurrentCube(),
+        actionToDTO(game.getAction()),
+        game.getPlayers().map(player=>PlayerToDTO(player)),
+        game.getBranches().map(branch=>BranchToDTO(branch)),
+        game.getGameState()
+    );
+}
 export function PlayerToDTO(player: Player){
     return new dtoPlayer(
         player.id,

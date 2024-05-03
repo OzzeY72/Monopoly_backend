@@ -31,7 +31,15 @@ export class MonopolyController {
   players(){
     return this.monopolyService.getPlayersInDto();
   }
-
+  @Get('game')
+  game(){
+    return this.monopolyService.getGameInDto();
+  }
+  
+  @Post('player')
+  addPlayer(@Body() body: any):boolean{
+    return this.monopolyService.addPlayer(body.nickname);
+  }
   @Post('action')
   branchAction(@Body() body: any):boolean{
     return this.monopolyService.branchAction(body.branch_id,body.action);

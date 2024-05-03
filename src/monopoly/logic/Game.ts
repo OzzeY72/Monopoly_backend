@@ -7,11 +7,11 @@ import { DefaultBranch } from "./Branches/DefaultBranch";
 import { OwnAbleBranch } from "./Branches/OwnAbleBranch";
 
 export enum GameState {
-    Start,
-    inGame,
-    waitAnswer,
-    bargaining,
-    End,
+    Start = "Start",
+    inGame = "inGame",
+    waitAnswer = "waitAnswer",
+    bargaining = "bargaining",
+    End = "End",
 }
 /* 
     Event List
@@ -25,7 +25,7 @@ export enum GameState {
 export class Game {
     private playerTurn:number = 0;
 
-    private bargaining: Player[] = [];
+    private bargaining: Player[] = []; 
     private bargaining_accepted: Player[] = [];
     private bargaining_count = 0;
     private bargaining_branch: OwnAbleBranch;
@@ -61,9 +61,22 @@ export class Game {
         //Init
         setTimeout(()=>this.initGame(),0);
     }
-
+    getTurn(){
+        if(this.gameState == GameState.bargaining) return this.bargaining_turn;
+        else return this.playerTurn;
+    }
+    getCurrentCube(){
+        return this.current_cube;
+    }
+    getAction(){
+        return this.actionInOrder;
+    }
+    getGameState(){
+        return this.gameState;
+    }
     initGame(){
         console.log("Game began !");
+        this.bargainingReset();
         this.gameState = GameState.inGame;
         console.log("Next turn " + this.getPlayer(this.playerTurn)?.nickname);
     }
@@ -99,26 +112,22 @@ export class Game {
 
     getPlayer(id:number):Player{
         return this.players.find(player=>player.id == id);
-        /*
-        if(id < this.players.length)
-            return this.players[id];
-        else
-            return null;
-        */
     }
 
     getPlayerBargaining(id:number):Player{
-        if(id < this.bargaining.length)
-            return this.bargaining[id];
-        else
-            return null;
+        return this.bargaining.find(player=>player.id == id);
     }
     
     getBranch(id:number):IBranch{
-        if(id < this.branches.length)
-            return this.branches[id];
-        else
-            return null;
+        return this.branches.find(branch=>branch.id == id); 
+    }
+
+    bargainingReset()
+    {
+        this.bargaining = [];
+        this.bargaining_branch = null;
+        this.bargaining_count = 0;
+        this.bargaining_turn = 0;
     }
 
     onBargainingFinish(data:number)
@@ -133,10 +142,7 @@ export class Game {
                 Event.getInstance().invoke('playerBought',[player.id,this.bargaining_branch.id]);
             }
         }
-        this.bargaining = [];
-        this.bargaining_branch = null;
-        this.bargaining_count = 0;
-        this.bargaining_turn = 0;
+        this.bargainingReset();
         this.changeGameState(GameState.inGame);
         console.log("Next step bargaining "+this.playerTurn);
     }
@@ -219,7 +225,7 @@ export class Game {
     onPlayerReachStart(player_id:number)
     {
         const player = this.getPlayer(player_id);
-        player.money += 2000;
+        //player.money += 2000;
         //console.log(player.money);
     }
 
@@ -358,5 +364,8 @@ export class Game {
     }
     getPlayers(){
         return this.players;
+    }
+    addPlayer(player:Player){
+        this.players.push(player);  
     }
 }

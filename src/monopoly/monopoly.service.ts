@@ -2,17 +2,15 @@ import { Injectable } from '@nestjs/common';
 import {Game, GameState} from './logic/Game'
 import { Player } from './logic/Player';
 import { RankFee } from './logic/interface/IBranch';
-import { Branch } from './logic/Branches/Branch';
 import { DefaultBranch } from './logic/Branches/DefaultBranch';
-import { Action } from './logic/Action';
-import { Event } from './logic/Event';
-import {BranchToDTO, PlayerToDTO, actionToDTO} from './api/mappers/monopoly.mappers'
+import {BranchToDTO, GameToDTO, PlayerToDTO, actionToDTO} from './api/mappers/monopoly.mappers'
 import { dtoAction } from './api/dto/dtoAction';
-import { ICoupleAble,IUpgradeAble } from './logic/interface/BranchInterfaces';
-import { OwnAbleBranch } from './logic/Branches/OwnAbleBranch';
+import { IUpgradeAble } from './logic/interface/BranchInterfaces';
 
 @Injectable()
 export class MonopolyService {
+  private readonly default_money = 15000;
+
   constructor(){}
   public game:Game = new Game(
     [
@@ -130,6 +128,15 @@ export class MonopolyService {
 
     //console.log(branch.owner?.nickname + " has " + branch.owner?.money);
   }
+  addPlayer(nickname:string):boolean{
+    if(!this.game.getPlayers().find(player=>player.nickname == nickname)){
+      this.game.addPlayer(new Player(this.game.getPlayers().length,nickname,this.default_money));
+      return true;
+    }
+    else{
+      return false;
+    }
+  }
 
   getBranchesInDto(){
     const arr = [];
@@ -138,11 +145,16 @@ export class MonopolyService {
     )
     return arr;
   }
+
   getPlayersInDto(){
     const arr = [];
     this.game.getPlayers().forEach(player=>
       arr.push(PlayerToDTO(player))
     )
     return arr;
+  }
+
+  getGameInDto(){
+    return GameToDTO(this.game);
   }
 }
