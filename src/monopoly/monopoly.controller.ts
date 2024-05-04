@@ -1,5 +1,6 @@
 import { Body, Controller, Get,Param,Post } from '@nestjs/common';
 import { MonopolyService } from './monopoly.service';
+import { Player } from './logic/Player';
 
 @Controller('monopoly')
 export class MonopolyController {
@@ -37,8 +38,8 @@ export class MonopolyController {
   }
   
   @Post('player')
-  addPlayer(@Body() body: any):boolean{
-    return this.monopolyService.addPlayer(body.nickname);
+  addPlayer(@Body() body: any):void{
+    this.monopolyService.addPlayer(body.nickname);
   }
   @Post('action')
   branchAction(@Body() body: any):boolean{

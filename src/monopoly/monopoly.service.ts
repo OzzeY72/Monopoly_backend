@@ -128,13 +128,14 @@ export class MonopolyService {
 
     //console.log(branch.owner?.nickname + " has " + branch.owner?.money);
   }
-  addPlayer(nickname:string):boolean{
+  addPlayer(nickname:string):Player{
     if(!this.game.getPlayers().find(player=>player.nickname == nickname)){
-      this.game.addPlayer(new Player(this.game.getPlayers().length,nickname,this.default_money));
-      return true;
+      const player = new Player(this.game.getPlayers().length,nickname,this.default_money)
+      this.game.addPlayer(player);
+      return player;
     }
     else{
-      return false;
+      return null;
     }
   }
 
